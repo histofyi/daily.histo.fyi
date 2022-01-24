@@ -1,0 +1,4 @@
+Flask
+zappa
+requests
+toml
