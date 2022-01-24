@@ -35,9 +35,6 @@ class steinProvider():
             }
         }
         data = httpProvider().put(url, json.dumps(payload), 'json', auth=self.config)
-
-        if data:
-            logging.warn(data)
-        else:
+        if not data:
             data = {}
         return data
