@@ -8,6 +8,7 @@ import logging
 
 
 from providers import steinProvider
+from functions import send_slack_message
 
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
@@ -87,7 +88,7 @@ def get_specific_item(user, collection, url):
 
 
 def get_first_item(user, collection):
-    return get_item(user, collection, mode='first')
+    return get_item(user, collection, mode='top')
 
 
 def get_item_by_base64_string(user,collection,base64_string):
@@ -118,13 +119,39 @@ def collect_items_for(user):
     for collection in user_collections:
         thiscollection = collection['collection']
         items[thiscollection] = {}
-        if collection['mode'] == 'first':
+        if collection['mode'] == 'top':
             items[thiscollection] = get_first_item(user, thiscollection)
         else:
             items[thiscollection] = get_item(user, thiscollection)
         items[thiscollection]['collection'] = thiscollection
     return items, user_collections
 
+
+def deliver_items_for(user):
+    deliveries = []
+    items, user_collections = collect_items_for(user)
+    for collection in user_collections:
+        thiscollection = collection['collection']
+        if thiscollection[-1] == 's':
+            icon = thiscollection[:-1]
+        else:
+            icon = thiscollection
+
+        variables = {
+            'name':user,
+            'icon':icon,
+            'collection':thiscollection,
+            'uid':items[thiscollection]['uid'],
+            'url':items[thiscollection]['item'],
+        }
+        if collection['mode'] == 'random':
+            variables['mode'] = 'random'
+        else:
+            variables['mode'] = None
+        send_slack_message(collection['webhook_url'], 'daily_item', variables)
+        logging.warn(collection)
+        deliveries.append({'collection':collection['webhook_url']})
+    return deliveries
 
 
 @app.route("/")
@@ -135,6 +162,8 @@ def home_handler():
 @app.route("/users/<string:user>")
 def user_handler(user):
     user_items, user_collections = collect_items_for(user)
+    deliveries = deliver_items_for(user)
+    logging.warn(deliveries)
     return user_items
 
 @app.route("/users/<string:user>/collections/<string:collection>")
