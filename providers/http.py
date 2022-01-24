@@ -22,11 +22,36 @@ class httpProvider():
             return None
 
 
-    def post(self, url, payload, format):
-        r = requests.post(url, data = payload)
+    def post(self, url, payload, format, auth=None):
+        if auth:
+            r = requests.post(url, data=payload, auth=(auth['username'], auth['password']))
+        else:
+            r = requests.post(url, data=payload)
         if r.status_code == 200:
-            content = r.json()
+            if format == 'json':
+                content = r.json()
+            else:
+                content = r.text
             return content
         else:
+            logging.warn(r.status_code)
+            logging.warn(r.text)
+            return None
+
+
+    def put(self, url, payload, format, auth=None):
+        if auth:
+            r = requests.put(url, data=payload, auth=(auth['username'], auth['password']))
+        else:
+            r = requests.put(url, data=payload)
+        if r.status_code == 200:
+            if format == 'json':
+                content = r.json()
+            else:
+                content = r.text
+            return content
+        else:
+            logging.warn(r.status_code)
+            logging.warn(r.text)
             return None
 

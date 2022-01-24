@@ -41,13 +41,20 @@ def get_user(user):
     else:
         return {}
 
-
-def get_collection(user, collection):
+def get_collection_metadata(user, collection):
     user = get_user(user)
+    thiscollection = {}
     if user != {}:
         thiscollection = [item for item in user['collections'] if item['collection'] == collection][0]
         if thiscollection:
-            data = steinProvider(thiscollection).get('daily')
+            return thiscollection
+    return thiscollection
+
+
+def get_collection(user, collection):
+    thiscollection = get_collection_metadata(user, collection)
+    if thiscollection != {}:
+        data = steinProvider(thiscollection).get('daily')
     return data
 
 
@@ -85,9 +92,13 @@ def user_collection_random_handler(user,collection):
 
 @app.route("/users/<string:user>/collections/<string:collection>/first")
 def user_collection_first_handler(user,collection):
+
     return get_item(user, collection, mode='first')
 
 
 @app.route("/users/<string:user>/collections/<string:collection>/redirect")
 def user_collection_redirect_handler(user,collection):
-    return "<p>Hello, person! We're logging your thing</p>"
+    collection_config = get_collection_metadata(user,collection)
+    thisitem = get_item(user, collection, mode='first')
+    data = steinProvider(collection_config).update('daily',thisitem)
+    return data
