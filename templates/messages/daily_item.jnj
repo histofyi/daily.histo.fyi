@@ -10,7 +10,7 @@
 			"type": "section",
 			"text": {
 				"type": "mrkdwn",
-				"text": "*Link:* <http://127.0.0.1:5000/users/{{name}}/collections/{{collection}}/redirect/{{uid}}|{{icon|capitalize}} link>"
+				"text": "*Link:* <http://127.0.0.1:5000/users/{{name}}/collections/{{collection}}/redirect/{{uid}}|{{title}}>"
 			}
 		}
 	]

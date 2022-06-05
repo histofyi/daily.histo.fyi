@@ -2,3 +2,4 @@ Flask
 zappa
 requests
 toml
+bs4

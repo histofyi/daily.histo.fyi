@@ -8,7 +8,7 @@ import logging
 
 
 from providers import steinProvider
-from functions import send_slack_message
+from functions import send_slack_message, fetch_title
 
 app = Flask(__name__)
 app.config.from_file('config.toml', toml.load)
@@ -136,13 +136,14 @@ def deliver_items_for(user):
             icon = thiscollection[:-1]
         else:
             icon = thiscollection
-
+        title = fetch_title(items[thiscollection]['item'])
         variables = {
             'name':user,
             'icon':icon,
             'collection':thiscollection,
             'uid':items[thiscollection]['uid'],
             'url':items[thiscollection]['item'],
+            'title':title
         }
         if collection['mode'] == 'random':
             variables['mode'] = 'random'

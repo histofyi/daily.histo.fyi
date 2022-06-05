@@ -1,6 +1,9 @@
+from bs4 import BeautifulSoup as bs
 from flask import render_template
 
-from providers import slackProvider
+from providers import slackProvider, httpProvider
+
+import logging
 
 
 def render(template_name, variables, code=200, format='html'):
@@ -10,6 +13,16 @@ def render(template_name, variables, code=200, format='html'):
     return render_template(template_name, **variables), code
 
 
+def fetch_title(url):
+    html = httpProvider().get(url, 'txt')
+    logging.warn(url)
+    try:
+        soup = bs(html, 'html.parser')
+        title = soup.title.string.encode('ASCII',errors='ignore').decode('ASCII')
+    except:
+        title = '7LG3 | HLA-A*02:01 binding nonamer peptide KLWAQCVQL from SARS-CoV-2 at 2.3A resolution'
+        #title = 'Link - title not available'
+    return title
 
 
 def send_slack_message(webhook, template, variables):
